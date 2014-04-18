@@ -67,6 +67,18 @@ def list_jobs(printer=None, **kwargs):
     # text/plain` header
     return (r.json() if hasattr(r, "json") else json.loads(r.text))['jobs']
 
+def get_printer(id, **kwargs):
+    """
+    Returns the data for a single printer.
+
+    :param      id: printer ID
+    :type       id: string
+    :returns: `dict` expressing a printer, or `None`
+
+    """
+    url = CLOUDPRINT_URL + "/printer"
+    r = requests.post(url, data={"printerid": id}, **kwargs)
+    return r.json() if r.status_code == requests.codes.ok else None
 
 def list_printers(**kwargs):
     """
