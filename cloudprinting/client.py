@@ -151,3 +151,28 @@ def submit_job(printer, content, title=None, capabilities=None, tags=None,
     url = CLOUDPRINT_URL + "/submit"
     r = requests.post(url, data=data, files=files, **kwargs)
     return r.json() if r.status_code == requests.codes.ok else r
+
+def share_printer(id, scope, role="USER", **kwargs):
+    """
+    Share a printer.
+
+    :param      id: the id of the printer being shared
+    :type       id: string
+    :param      scope: Email of the user or group or domain name to share the printer with
+    :type       scope: string
+    :param role: The role the user or group is granted with
+    :type  role: string USER or MANAGER
+
+    :returns: API response data as `dict`, or the HTTP response on failure
+
+    """
+    if role not in set(["USER", "MANAGER"]):
+        role = "USER"
+    data = {
+            "printerid": id,
+            "scope": scope,
+            "role": role
+            }
+    url = CLOUDPRINT_URL + "/share"
+    r = requests.post(url, data=data, **kwargs)
+    return r.json() if r.status_code == requests.codes.ok else r
