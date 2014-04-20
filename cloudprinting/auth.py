@@ -30,14 +30,13 @@ else:
 
             if self.caching:
                 # Hook the response to retry if the auth token is stale
-                def hook(response, **kwargs):
+                def hook(response, *args, **kwargs):
                     if response.status_code == requests.codes.forbidden:
                         del self.token  # clear stale token
                         request = response.request
                         request.deregister_hook('response', hook)  # retry one time
-                        request.send(anyway=True)
-                        return request.response
-                    return response
+                        #request.send(anyway=True)
+                        response.connection.send(request, **kwargs)
                 r.hooks['response'].insert(0, hook)
             return r
 
@@ -107,7 +106,7 @@ class OAuth2(object):
 
         if self.client_id and self.client_secret and self.refresh_token:
             # enable auto refreshing of token
-            def hook(response, **kwargs):
+            def hook(response, *args, **kwargs):
                 if response.status_code == requests.codes.forbidden:
                     self.expired = True
                     self.refresh()
@@ -115,9 +114,8 @@ class OAuth2(object):
                         request = response.request
                         self._stamp(request)
                         request.deregister_hook('response', hook)  # retry one time
-                        request.send(anyway=True)
-                        return request.response
-                return response
+                        #request.send(anyway=True)
+                        response.connection.send(request, **kwargs)
             r.hooks['response'].insert(0, hook)
         return r
 
